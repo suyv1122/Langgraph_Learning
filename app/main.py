@@ -1,7 +1,5 @@
 # 13. app/main.py（FastAPI）
-from tkinter.font import names
 
-import uvicorn
 from fastapi import FastAPI
 from pydantic import BaseModel
 from app.router_graph import router_graph
