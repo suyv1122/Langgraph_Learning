@@ -85,10 +85,10 @@ def load_single_file(path: Path) -> List[Document]:
     if suf == '.pdf':
         return load_pdf(path)
     if suf in ['.docx', '.doc']:
-        return load_docs(path)
+        return load_docx(path)
     if suf in ['.md', '.txt']:
         text = path.read_text(encoding="utf-8")
-        return [Document(page_context=text, metadata={"source": str(path)})] if text.strip() else []
+        return [Document(page_content=text, metadata={"source": str(path)})] if text.strip() else []
     return []
 
 def split_with_visibility(docs: List[Document], visibility: str, doc_id: str | None = None) -> List[Document]:
