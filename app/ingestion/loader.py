@@ -77,3 +77,25 @@ def split_docs(docs: List[Document]) -> List[Document]:
         chunk_overlap=settings.chunk_overlap
     )
     return splitter.split_documents(docs)
+
+def load_single_file(path: Path) -> List[Document]:
+    """用于应对后续文件单独追加而设计，本身用于处理单个文件的读取"""
+    """根据文件后缀加载文件，返回LangChain的Document列表"""
+    suf = path.suffix.lower()
+    if suf == '.pdf':
+        return load_pdf(path)
+    if suf in ['.docx', '.doc']:
+        return load_docs(path)
+    if suf in ['.md', '.txt']:
+        text = path.read_text(encoding="utf-8")
+        return [Document(page_context=text, metadata={"source": str(path)})] if text.strip() else []
+    return []
+
+def split_with_visibility(docs: List[Document], visibility: str, doc_id: str | None = None) -> List[Document]:
+    chunks = split_docs(docs)
+    for c in chunks:
+        c.metadata = dict(c.metadata or {})
+        c.metadata["visibility"] = visibility
+        if doc_id:
+            c.metadata["doc_id"] = doc_id
+    return chunks

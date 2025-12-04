@@ -1,27 +1,107 @@
-# 13. app/main.py（FastAPI）
+from __future__ import annotations
+from app.deps import get_vs, get_embeddings
+from app.ingestion.loader import load_single_file, split_with_visibility, load_docs, split_docs
+from app.config import settings
+import time
+import uuid
+from pathlib import Path
+from typing import Optional
+import chromadb
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 
-from fastapi import FastAPI
-from pydantic import BaseModel
-from app.router_graph import router_graph
+DATA_DOCS_DIR = Path('./data/docs')
+DATA_DOCS_DIR.mkdir(parents=True, exist_ok=True)
 
-print(">>> USING MAIN:", __file__)
+@app.post('/ingest')
+async def ingest(
+        file: UploadFile = File(...),
+        visibility: str = Form('public'),
+        doc_id: Optional[str] = Form(None)
+):
+    """
+    Upload a single document and upsert into Chroma.
+    :param - Saves file to ./data/docs/
+    :param - Loads & splits into chunks
+    :param - Attaches visibility/doc_id metadata
+    :param - Upserts into the configured Chroma collection
+    """
+    if not file.filename:
+        raise HTTPException(status_code=400, detail='Empty filename')
 
-app = FastAPI(title="Enterprise KB Assistant")
+    visibility = (visibility or 'public').strip().lower()
 
-class ChatReq(BaseModel):
-    text: str
-    user_role: str = "public"
-    requester: str = "anonymous"
+    suffix = Path(file.filename).suffix
+    safe_name = f'{int(time.time())}_{uuid.uuid4().hex}{suffix}'
+    save_path = DATA_DOCS_DIR / safe_name
 
-print("ChatReq schema =", ChatReq.model_json_schema())
+    content = await file.read()
+    if not content:
+        raise HTTPException(status_code=400, detail='Empty file')
+    save_path.write_bytes(content)
 
-class ChatResp(BaseModel):
-    answer: str
+    docs = load_single_file(save_path)
+    if not docs:
+        raise HTTPException(status_code=404, detail=f'Unsupported or empty file type: {suffix}')
 
-@app.post("/chat", response_model=ChatResp)
-def chat(req: ChatReq):
-    out = router_graph.invoke(req.model_dump())
-    return {"answer": out["answer"]}
+    chunks = split_with_visibility(docs, visibility=visibility, doc_id=doc_id)
+
+    vs = get_vs()
+    vs.add_documents(chunks)
+    try:
+        vs.persist()
+    except Exception:
+        pass
+
+    return {
+        'saved_as': str(save_path),
+        'visibility': visibility,
+        'doc_id': doc_id,
+        'chunks': len(chunks)
+    }
+
+
+@app.post("/reindex")
+def reindex(visibility_default: str = Form('public')):
+    """
+    Full rebuild of the collection from ./data/docs.
+
+    WARNING: This deletes the current collection first.
+    """
+    visibility_default = (visibility_default or 'public').strip().lower()
+
+    # 1) Delete & recreate collection via chromadb client
+    client = chromadb.HttpClient(host=settings.chroma_host, port=settings.chroma_port)
+    try:
+        client.delete_collection(settings.collection_name)
+    except Exception:
+        pass
+    client.get_or_create_collection(settings.collection_name)
+
+    # 2) Rebuild using LangChain wrapper
+    vs = get_vs()
+    raw_docs = load_docs(str(DATA_DOCS_DIR))
+    if not raw_docs:
+        return {'chunks': 0, 'docs': 0, 'message': 'No documents found in data/docs'}
+
+    chunks = split_docs(raw_docs)
+    for c in chunks:
+        c.metadata = dict(c.metadata or {})
+        c.meatadata.setdefault('visibility', visibility_default)
+
+    vs.add_documents(chunks)
+    try:
+        vs.persist()
+    except Exception:
+        pass
+
+    return {'docs': len(raw_docs), 'chunks': len(chunks), 'visibility_default': visibility_default}
+
+
+@app.get('/')
+def root():
+    return {'status': 'ok', 'docs': '/docs'}
+
+
 
 
 # if __name__ == "__main__":
