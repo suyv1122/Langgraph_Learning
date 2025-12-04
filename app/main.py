@@ -1,7 +1,7 @@
 from __future__ import annotations
 from app.deps import get_vs, get_embeddings
 from app.ingestion.loader import load_single_file, split_with_visibility, load_docs, split_docs
-from app.config import settings
+from app.config import settings, DOCS_DIR
 import time
 import uuid
 from pathlib import Path
@@ -9,7 +9,8 @@ from typing import Optional
 import chromadb
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 
-DATA_DOCS_DIR = Path('./data/docs')
+app = FastAPI(title="Enterprise KB Assistant")
+DATA_DOCS_DIR = Path(DOCS_DIR)
 DATA_DOCS_DIR.mkdir(parents=True, exist_ok=True)
 
 @app.post('/ingest')
@@ -86,7 +87,7 @@ def reindex(visibility_default: str = Form('public')):
     chunks = split_docs(raw_docs)
     for c in chunks:
         c.metadata = dict(c.metadata or {})
-        c.meatadata.setdefault('visibility', visibility_default)
+        c.metadata.setdefault('visibility', visibility_default)
 
     vs.add_documents(chunks)
     try:
@@ -101,11 +102,8 @@ def reindex(visibility_default: str = Form('public')):
 def root():
     return {'status': 'ok', 'docs': '/docs'}
 
+# uvicorn app.main:app --reload --port 8002
 
-
-
-# if __name__ == "__main__":
-#     uvicorn.run(app, host="0.0.0.0", port=8002, reload=True)
-
-# Terminal % uvicorn app.main:app --reload --port 8002
-
+# curl -X POST "http://127.0.0.1:8002/ingest" \
+#   -F "file=@制度示例1_员工年假与请假管理办法.docx" \
+#   -F "visibility=public"
