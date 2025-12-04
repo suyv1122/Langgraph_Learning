@@ -1,4 +1,7 @@
 from __future__ import annotations
+
+from openai import BaseModel
+
 from app.deps import get_vs, get_embeddings
 from app.ingestion.loader import load_single_file, split_with_visibility, load_docs, split_docs
 from app.config import settings, DOCS_DIR
@@ -9,9 +12,24 @@ from typing import Optional
 import chromadb
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 
+from app.router_graph import router_graph
+
 app = FastAPI(title="Enterprise KB Assistant")
 DATA_DOCS_DIR = Path(DOCS_DIR)
 DATA_DOCS_DIR.mkdir(parents=True, exist_ok=True)
+
+class ChatReq(BaseModel):
+    text: str
+    user_role: str = 'public'
+    requester: str = 'anonymous'
+
+class ChatResp(BaseModel):
+    answer: str
+
+@app.post('/chat', response_model=ChatResp)
+def chat(req: ChatReq):
+    out = router_graph.invoke(req.model_dump())
+    return {'answer': out['answer']}
 
 @app.post('/ingest')
 async def ingest(
@@ -42,7 +60,7 @@ async def ingest(
 
     docs = load_single_file(save_path)
     if not docs:
-        raise HTTPException(status_code=404, detail=f'Unsupported or empty file type: {suffix}')
+        raise HTTPException(status_code=400, detail=f'Unsupported or empty file type: {suffix}')
 
     chunks = split_with_visibility(docs, visibility=visibility, doc_id=doc_id)
 
