@@ -1,0 +1,21 @@
+
+# --- text for mysql ---
+
+curl -X POST http://127.0.0.1:8002/chat \
+  -H "Content-Type: application/json" \
+  -d '{"text":"我下周二想请一天年假","user_role":"public","requester":"peter","session_id":"s3"}'
+
+
+curl -X POST http://127.0.0.1:8002/chat \
+  -H "Content-Type: application/json" \
+  -d '{"text":"确认","user_role":"public","requester":"peter","session_id":"s3"}'
+
+
+curl -X POST http://127.0.0.1:8002/chat \
+  -H "Content-Type: application/json" \
+  -d '{"text":"查我的请假状态 LV-32bd2433","user_role":"public","requester":"peter"}'
+
+
+curl -X POST http://127.0.0.1:8002/chat \
+  -H "Content-Type: application/json" \
+  -d '{"text":"取消请假申请 LV-32bd2433","user_role":"public","requester":"peter"}'

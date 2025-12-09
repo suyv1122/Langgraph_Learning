@@ -1,8 +1,7 @@
 from typing import TypedDict, List, Any
 from langgraph.graph import StateGraph, START, END
-from langchain_core.messages import HumanMessage, AIMessage
 
-from app.rag.prompts import QA_SYSTEM, QA_USER
+from app.prompts.QaPrompts import QA_SYSTEM, QA_USER
 from app.deps import get_llm, get_vs
 
 """下面是LangGraph中的状态结构，类似上下文的形式：
