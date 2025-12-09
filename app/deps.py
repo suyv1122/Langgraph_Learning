@@ -4,6 +4,7 @@ from langchain_ollama import ChatOllama, OllamaEmbeddings
 from app.llm.simple_ollama_llm import SimpleOllamaLLM
 from app.rag.vectorstore import get_vectorstore
 from app.simplestool.simple_embedding import SimpleEmbedding
+from app.config import settings
 
 def get_llm():
     # return ChatOllama(
@@ -11,7 +12,7 @@ def get_llm():
     #     base_url="http://localhost:11434",
     #     temperature=0.2,
     # )
-    return SimpleOllamaLLM(model="gemma2:9b")
+    return SimpleOllamaLLM(model=settings.model_name)
 
 def get_embeddings():
     """因兼容问题，调用了本地实现的新embedding方法"""

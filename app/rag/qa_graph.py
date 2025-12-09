@@ -77,17 +77,27 @@ def generate_answer(state: QAState) -> dict:
     llm = get_llm()
     docs = state.get('docs', [])
 
-    # 准备上下文————将检索到的文档拼成一段context
+    # 1. 拼接检索到的文档，生成 context 文本
     context = '\n\n'.join(
-        f'[{i + 1}]{d.page_content}\n(source={d.metadata.get("source")}, page={d.metadata.get("page")})' for i, d in
+        f'[{i + 1}]{d.page_content}\n'
+        f'(source={d.metadata.get("source")}, page={d.metadata.get("page")})' for i, d in
         enumerate(docs[:6])  # 只拿前面六条文档，避免提示词过长
         # 每个文档前添加了[i]引用，方便LLM后续引用，前面的提示词有提到此要求
     )
-    # 准备提示词
-    prompt = QA_USER.format(question=state['question'], context=context)
-    # 拼接消息列表，AIMessage视为预设指令，HumanMessage是本次真正发出的内容
-    messages = [AIMessage(content=QA_SYSTEM), HumanMessage(content=prompt)]
-    ans = llm.invoke(messages).content  # 大模型返回结果
+
+    # 2. 生成用户提示词(带上下文)
+    user_prompt = QA_USER.format(
+        question=state.get('question'),
+        context=context
+    )
+
+    # 3. 将系统指令 + 用户内容合成一个长prompt
+    full_prompt = f'{QA_SYSTEM}\n\n{user_prompt}'
+
+    # 4. 适配于简单LLM，塞一个字符串即可
+    ans = llm.invoke(full_prompt)
+    # messages = [AIMessage(content=QA_SYSTEM), HumanMessage(content=prompt)]
+    # ans = llm.invoke(messages).content
     return {'answer': ans}
 
 
