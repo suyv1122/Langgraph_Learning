@@ -42,8 +42,6 @@ class SimpleEmbedding:
         """
         return [self._call_ollama_embed(d) for d in docs]
 
-# FIXME: 检查ollama模块下的 ollama.__version__ 以确定输出格式是否有问题
-
 
 import ollama
 class AbandonedSimpleEmbedding:

@@ -263,7 +263,7 @@ def confirm_node(state: LeaveState) -> dict:
 
 
 def decide_confirm(state: LeaveState) -> str:
-    # FIXME: 确认回答的session_id与第一次提问的session_id需要手动对齐，应当自动化
+    # TODO: 确认回答的session_id与第一次提问的session_id需要手动对齐，应当自动化
     text = state.get('text', '').strip().lower()
     if text in {'确认', '确定', 'ok', 'yes', 'submit'}:
         return 'create'
