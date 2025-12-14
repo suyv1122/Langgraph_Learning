@@ -1,5 +1,5 @@
 
-# --- text for mysql ---
+# --- test for mysql ---
 
 curl -X POST http://127.0.0.1:8002/chat \
   -H "Content-Type: application/json" \
@@ -19,3 +19,17 @@ curl -X POST http://127.0.0.1:8002/chat \
 curl -X POST http://127.0.0.1:8002/chat \
   -H "Content-Type: application/json" \
   -d '{"text":"取消请假申请 LV-32bd2433","user_role":"public","requester":"peter"}'
+
+# --- test for graph ---
+
+uvicorn app.main:app --reload --port 8002
+
+
+curl -X POST http://127.0.0.1:8002/chat \
+  -H "Content-Type: application/json" \
+  -d '{"text":"我想请年假，2025-12-26 09:00 到 2025-12-27 18:00","user_role":"public","requester":"Ame","session_id":"s1"}'
+
+
+curl -X POST http://127.0.0.1:8002/chat \
+  -H "Content-Type: application/json" \
+  -d '{"text":"确认","user_role":"public","requester":"Ame","session_id":"s1"}'

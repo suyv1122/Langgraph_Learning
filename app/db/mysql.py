@@ -7,7 +7,7 @@ MYSQL_HOST = os.getenv('MYSQL_HOST', 'localhost')
 MYSQL_PORT = int(os.getenv('MYSQL_PORT', 3306))
 MYSQL_USER = os.getenv('MYSQL_USER', 'paradice')
 MYSQL_PASSWORD = os.getenv('MYSQL_PASSWORD', '1598745632')
-MYSQL_DB = os.getenv('MYSQL_DB', 'enterprise_kb')
+MYSQL_DB = os.getenv('MYSQL_DB', 'leave_Request')
 
 @contextmanager
 def get_conn():

@@ -13,6 +13,7 @@ from typing import Any, Dict
 from langgraph.graph import StateGraph, START, END
 from langchain_core.messages import HumanMessage, SystemMessage
 
+from app.db.mysql import insert_leave_request, get_leave_balance, cancel_leave_request, get_leave_request
 from app.deps import get_llm
 from app.workflows.leave.models import LeaveState
 from app.workflows.leave.rules import validate_leave
@@ -221,58 +222,6 @@ def extract_slots_node(state: LeaveState) -> dict:
     })
     req['requester'] = state.get('requester', 'anonymous')
     return {'req': req}
-
-
-def validate_node(state: LeaveState) -> dict:
-    req = state.get('req') or {}
-    missing, violations = validate_leave(req, balance_days=5.0)
-    return {'missing_fields': missing, 'violations': violations, 'req': req}
-
-
-def decide_next(state: LeaveState) -> str:
-    if state.get('missing_fields') or state.get('violations'):
-        return 'need_info'
-    return 'confirm'
-
-
-def need_info_node(state: LeaveState) -> dict:
-    missing =state.get('missing_fields') or []
-    violations = state.get('violations') or []
-
-    tips = []
-    if missing:
-        tips.append('缺少信息: ' + '、 '.join(missing))
-    if violations:
-        tips.append('规则问题: ' + '; '.join(violations))
-
-    return {'answer': '; '.join(tips) + '。请补充/修正后再说一次。'}
-
-
-def confirm_node(state: LeaveState) -> dict:
-    req = state.get('req') or {}
-    ans = (
-        '请确认你的请假信息: \n'
-        f'- 类型: {req.get("leave_type")}\n'
-        f'- 开始: {req.get("start_time")}\n'
-        f'- 结束: {req.get("end_time")}\n'
-        f'- 时长: {req.get("duration_days")}天\n'
-        f'- 原因: {req.get("reason") or '无'}\n'
-        '回复‘确认’提交，或直接回复修改后的信息。'
-    )
-    return {'answer': ans}
-
-
-def decide_confirm(state: LeaveState) -> str:
-    # FIXME: 确认回答的session_id与第一次提问的session_id需要手动对齐，应当自动化
-    text = state.get('text', '').strip().lower()
-    if text in {'确认', '确定', 'ok', 'yes', 'submit'}:
-        return 'create'
-    return 'end'
-
-
-def create_leave_node(state: LeaveState) -> dict:
-    leave_id = 'LV-' + uuid.uuid4().hex[:8]
-    return {'leave_id': leave_id, 'answer': f'已为您提交请假申请，编号{leave_id}，等待审批。'}
 
 
 def build_leave_graph():
