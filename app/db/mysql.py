@@ -7,7 +7,7 @@ MYSQL_HOST = os.getenv('MYSQL_HOST', 'localhost')
 MYSQL_PORT = int(os.getenv('MYSQL_PORT', 3306))
 MYSQL_USER = os.getenv('MYSQL_USER', 'paradice')
 MYSQL_PASSWORD = os.getenv('MYSQL_PASSWORD', '1598745632')
-MYSQL_DB = os.getenv('MYSQL_DB', 'enterprise_kb')
+MYSQL_DB = os.getenv('MYSQL_DB', 'Leave_Request')
 
 @contextmanager
 def get_conn():
@@ -42,24 +42,28 @@ def insert_leave_request(req: dict) -> str:
     req expects keys: leave_id, requester, leave_type, start_time, end_time, duration_days, reason
     """
     with get_conn() as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                INSERT INTO leave_requests
-                (leave_id, requester, leave_type, start_time, end_time, duration_days, reason, status)
-                VALUES (%s,%s,%s,%s,%s,%s,%s,'PENDING')
-                """,
-                (
-                    req['leave_id'],
-                    req['requester'],
-                    req['leave_type'],
-                    req['start_time'],
-                    req['end_time'],
-                    req['duration_days'],
-                    req['reason']
+        try:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    INSERT INTO leave_requests
+                    (leave_id, requester, leave_type, start_time, end_time, duration_days, reason, status)
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,'PENDING')
+                    """,
+                    (
+                        req['leave_id'],
+                        req['requester'],
+                        req['leave_type'],
+                        req['start_time'],
+                        req['end_time'],
+                        req['duration_days'],
+                        req['reason']
+                    )
                 )
-            )
-    return req['leave_id']
+        except Exception as e:
+            print("[DB ERROR] insert_leave_request failed:", repr(e))
+            raise
+        return req['leave_id']
 
 
 def get_leave_request(leave_id: str) -> dict | None:
