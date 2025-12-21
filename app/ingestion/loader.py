@@ -77,3 +77,21 @@ def split_docs(docs: List[Document]) -> List[Document]:
         chunk_overlap=settings.chunk_overlap
     )
     return splitter.split_documents(docs)
+
+def split_with_visibility(
+        docs: List[Document],
+        visibility: str,
+        doc_id: str | None = None,
+        extra_meta: dict | None =None
+) -> List[Document]:
+    chunks = split_docs(docs)
+    extra_meta = dict(extra_meta or {})
+    for c in chunks:
+        c.metadata = dict(c.metadata or {})
+        c.metadata['visibility'] = visibility
+        if doc_id:
+            c.metadata['doc_id'] = doc_id
+            for k,v in extra_meta.items():
+                if v is not None:
+                    c.metadata[k] = v
+    return chunks
