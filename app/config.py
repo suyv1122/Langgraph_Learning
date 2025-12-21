@@ -18,7 +18,7 @@ class Settings(BaseModel):
     model_name: str = os.getenv("MODEL_NAME", "gemma2:9b")
     # model_name: str = os.getenv("MODEL_NAME", "llama3.2")
     chroma_dir: str = CHROMA_DIR
-    chroma_host: str = os.getenv("CHROMA_HOST", "localhost")
+    chroma_host: str = os.getenv("CHROMA_HOST", "127.0.0.1")
     chroma_port: int = int(os.getenv("CHROMA_PORT", "8000"))
     collection_name: str = os.getenv("COLLECTION_NAME", "knowledge_base")
     chunk_size: int = int(os.getenv("CHUNK_SIZE", "800"))

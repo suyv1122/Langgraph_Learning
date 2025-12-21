@@ -6,7 +6,7 @@ from jose import jwt
 from passlib.context import CryptContext
 
 PWD_CONTEXT = CryptContext(
-    schemes=['bcrypt_sha256'],
+    schemes=['bcrypt_sha256', 'bcrypt'],
     deprecated='auto'
 )
 

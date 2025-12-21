@@ -20,6 +20,7 @@ def load_pdf(path: Path) -> List[Document]:
             ))
     return docs
 
+
 def load_docx(path: Path) -> List[Document]:
     """
     读取指定目录下所有支持的文档。
@@ -29,7 +30,6 @@ def load_docx(path: Path) -> List[Document]:
     d = docx.Document(str(path))
     text = "\n".join(p.text for p in d.paragraphs if p.text.strip())
     return [Document(page_content=text, metadata={"source": str(path)})] if text else []
-
 
 
 def load_docs(dir_path: str | Path | None = None) -> List[Document]:
@@ -71,9 +71,42 @@ def load_docs(dir_path: str | Path | None = None) -> List[Document]:
             ))
     return docs
 
+
 def split_docs(docs: List[Document]) -> List[Document]:
     splitter = RecursiveCharacterTextSplitter(
         chunk_size=settings.chunk_size,
         chunk_overlap=settings.chunk_overlap
     )
     return splitter.split_documents(docs)
+
+
+def split_with_visibility(
+        docs: List[Document],
+        visibility: str,
+        doc_id: str | None = None,
+        extra_meta: dict | None =None   # extra_meta 想现场动态添加的内容
+) -> List[Document]:
+    chunks = split_docs(docs)
+    extra_meta = dict(extra_meta or {}) # 扩展元数据(参数重额外提供)
+    for c in chunks:    # 循环切割好的文件块
+        c.metadata = dict(c.metadata or {}) # 讲每个块的固有元数据取出
+        c.metadata['visibility'] = visibility   # 加入可见性元数据
+        if doc_id:  # 如果手动提供了文档id，则将其也加入元数据
+            c.metadata['doc_id'] = doc_id
+            for k,v in extra_meta.items():  # k为键，v为值
+                if v is not None:   # 如果值不空，将额外元数据加入
+                    c.metadata[k] = v
+    return chunks
+
+
+def load_single_file(path: Path) -> List[Document]:
+    """根据文件后缀加载文件，返回LangChain的 Document列表"""
+    suf = path.suffix.lower()
+    if suf == ".pdf":
+        return load_pdf(path)
+    if suf in [".docx", ".doc"]:
+        return load_docx(path)
+    if suf in [".md", ".txt"]:
+        text = path.read_text(encoding="utf-8")
+        return [Document(page_content=text, metadata={"source": str(path)})] if text.strip() else []
+    return []
