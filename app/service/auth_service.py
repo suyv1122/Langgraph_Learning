@@ -12,7 +12,7 @@ PWD_CONTEXT = CryptContext(
 
 JWT_SECRET = os.getenv('JWT_SECRET', 'dev-only-change-me')  # jwt加密用的小字符串，可变
 JWT_ALG = os.getenv('JWT_ALG', 'HS256') # 设置加密规则
-JWT_EXPIRE_MINUTES = os.getenv('JWT_EXPIRE_MINUTES', '120') # 设置token过期时间
+JWT_EXPIRE_MINUTES = int(os.getenv('JWT_EXPIRE_MINUTES', '120')) # 设置token过期时间
 
 def hash_password(password: str) -> str:
     return PWD_CONTEXT.hash(password)

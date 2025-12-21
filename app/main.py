@@ -1,12 +1,15 @@
 # 13. app/main.py（FastAPI）
-from typing import Optional
 import uuid
 
 from fastapi import FastAPI
-from pydantic import BaseModel
+
+from app.model.auth_model import ChatResp, ChatReq
 from app.router_graph import router_graph
 from app.config import settings
 from app.db.redis_session import load_session, save_session
+
+from app.api.auth_api import router as auth_router
+from app.api.rbac_api import router as rbac_router
 
 SESSIONS: dict[str, dict] = {}
 settings.memory_dir.mkdir(parents=True, exist_ok=True)
@@ -14,19 +17,8 @@ settings.memory_dir.mkdir(parents=True, exist_ok=True)
 print(">>> USING MAIN:", __file__)
 
 app = FastAPI(title="Enterprise KB Assistant")
-
-class ChatReq(BaseModel):
-    text: str
-    user_role: str = "public"
-    requester: str = "anonymous"
-    session_id: Optional[str] = None
-
-print("ChatReq schema =", ChatReq.model_json_schema())
-
-class ChatResp(BaseModel):
-    answer: str
-    session_id: Optional[str] = None
-    active_route: Optional[str] = None
+app.include_router(auth_router)
+app.include_router(rbac_router)
 
 @app.post("/chat", response_model=ChatResp)
 def chat(req: ChatReq):
