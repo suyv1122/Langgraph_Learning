@@ -17,6 +17,7 @@ from app.db.redis_session import load_session, save_session
 from app.api.auth_api import router as auth_router, get_current_user
 from app.api.rbac_api import router as rbac_router
 from app.api.kb_api import router as kb_router
+from app.api.audio_api import router as audio_router
 from app.service.rbac_service import check_permission
 
 SESSIONS: dict[str, dict] = {}
@@ -35,6 +36,9 @@ app = FastAPI(title="Enterprise KB Assistant")
 app.include_router(auth_router)
 app.include_router(rbac_router)
 app.include_router(kb_router)
+app.include_router(audio_router)
+
+
 @app.post("/chat", response_model=ChatResp)
 def chat(req: ChatReq):
     payload = req.model_dump()

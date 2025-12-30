@@ -7,8 +7,8 @@ from app.config import settings
 
 
 def get_collection():
-    clint = chromadb.HttpClient(host=settings.chroma_host, port=settings.chroma_port)
-    return clint.get_or_create_collection(settings.collection_name)
+    client = chromadb.HttpClient(host=settings.chroma_host, port=settings.chroma_port)
+    return client.get_or_create_collection(settings.collection_name)
 
 
 def delete_by_doc_id(doc_id: str) -> int:

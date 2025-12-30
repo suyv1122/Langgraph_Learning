@@ -2,7 +2,7 @@ from app.config import settings
 from langchain_ollama import ChatOllama, OllamaEmbeddings
 
 from app.llm.simple_ollama_llm import SimpleOllamaLLM
-from app.rag.vectorstore import get_vectorstore
+from app.rag.vectorstore import get_vectorstore, get_audio_vectorstore
 from app.simplestool.simple_embedding import SimpleEmbedding
 from app.config import settings
 
@@ -21,6 +21,9 @@ def get_embeddings():
 
 def get_vs():
     return get_vectorstore(get_embeddings())
+
+def get_audio_vs():
+    return get_audio_vectorstore(get_embeddings())
 
 if __name__ == '__main__':
     print(get_llm())

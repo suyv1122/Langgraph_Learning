@@ -45,20 +45,42 @@ def upsert_kb_document(
             )
 
 
-def list_kb_document(*, limit: int=50, offset: int=0, visibility: str | None = None) -> list[dict[str, Any]]:
+def list_kb_document(*,
+                     limit: int=50,
+                     offset: int=0,
+                     visibility: str | None = None,
+                     q: str | None = None,
+                     order_by: str = "updated_at",
+                     desc: bool = True) -> list[dict[str, Any]]:
     limit = max(1, min(int(limit), 200))
     offset = max(0, int(offset))
 
+    allowed_order = {'updated_at', 'created_at', 'original_filename', 'doc_id', 'visibility'}
+    if order_by not in allowed_order:
+        order_by = 'updated_at'
+
+    order_dir = 'DESC' if desc else 'ASC'
+
+
     sql = (
-        'SELECT doc_id, original_filename, stored_path, visibility, uploader_user_id, uploader_username,  chunk_count,'
+        'SELECT doc_id, original_filename, stored_path, visibility, uploader_user_id, uploader_username, chunk_count,'
         'created_at, updated_at '
         'FROM kb_documents WHERE is_deleted=0'
     )
     args: list[Any] = []
+
     if visibility:
-        sql += ' AND visibility=%s'
+        sql += 'AND visibility=%s'
         args.append(visibility)
-    sql += ' ORDER BY updated_at DESC LIMIT %s OFFSET %s' # 数据库无序，因此需要手动排序并限制检索输出数量，防止将所有内容丢出
+
+    if q:
+        q = q.strip()
+        if q:
+            sql += ' AND (original_filename LIKE %s OR doc_id LIKE %s)'
+            like = f'%{q}%'
+            args.extend([like, like])
+
+    sql += f'ORDER BY {order_by} {order_dir} LIMIT %s OFFSET %s' # 数据库无序，因此需要手动排序并限制检索输出数量，防止将所有内容丢出
     args.extend([limit, offset])
 
     with get_conn() as conn:
