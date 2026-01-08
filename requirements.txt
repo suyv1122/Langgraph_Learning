@@ -42,4 +42,8 @@ ffmpeg-python>=0.2.0    # 调用ffmpeg
 soundfile>=0.13.1
 numpy>=2.4.0
 
+# --- audio 异步音频入库 ---
+celery==5.6.0   # 分布式任务队列/异步任务框架，用于将消息发送至消息队列
+amqp==5.3.1     # celery依赖链中常见库，提供AMQP消息队列协议的客户端实现；用于建立链接、发送消息、确认ack等
+
 # pip install -U -r requirements.txt
