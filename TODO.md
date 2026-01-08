@@ -5,6 +5,7 @@
 
 NEXT
 - ### 人类语言翻译每个文件内每个函数的意义
+- ### pipeline.py 的人类化语言描述
 
 ## DONE
 - ### 将基础模型Base_model 单独提出并保存 (app/model/auth_model)
