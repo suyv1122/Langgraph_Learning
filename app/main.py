@@ -19,6 +19,7 @@ from app.api.rbac_api import router as rbac_router
 from app.api.kb_api import router as kb_router
 from app.api.audio_api import router as audio_router
 from app.service.rbac_service import check_permission
+from app.api.audio_admin_api import router as audio_admin_router
 
 SESSIONS: dict[str, dict] = {}
 settings.memory_dir.mkdir(parents=True, exist_ok=True)
@@ -37,6 +38,7 @@ app.include_router(auth_router)
 app.include_router(rbac_router)
 app.include_router(kb_router)
 app.include_router(audio_router)
+app.include_router(audio_admin_router)
 
 
 @app.post("/chat", response_model=ChatResp)
