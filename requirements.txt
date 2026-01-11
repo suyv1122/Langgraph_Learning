@@ -47,4 +47,8 @@ webrtcvad==2.0.10       # 核查一个音频是不是语音，只使用cpu，速
 celery==5.6.0   # 分布式任务队列/异步任务框架，用于将消息发送至消息队列
 amqp==5.3.1     # celery依赖链中常见库，提供AMQP消息队列协议的客户端实现；用于建立链接、发送消息、确认ack等
 
+# --- 9.0依赖 ---
+elasticsearch==9.2.1
+transformers>=4.40.0
+torch>=2.1.0
 # pip install -U -r requirements.txt
