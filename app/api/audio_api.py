@@ -14,8 +14,10 @@ from app.db import audio_db, audio_job_db
 from app.deps import get_audio_vs
 from app.model.audio_model import AudioIngestAsyncResp, AudioJobResp, AudioDocDetail, AudioSearchResp, AudioSearchHit, \
     AudioCitation, AudioAskResp, AudioAskReq
+from app.service.rbac_check_permission import require_kb_manage_docs
 from app.service.rbac_service import allowed_kb_visibilities, check_permission
 from app.tasks.audio_tasks import audio_ingest_task
+from app.audio.audio_tasks import audio_reindex_task
 
 router = APIRouter(prefix="/audio", tags=["audio"])
 
@@ -633,3 +635,42 @@ def get_audio_clip(
     background_tasks.add_task(lambda p=str(clip_path): Path(p).unlink(missing_ok=True))
 
     return FileResponse(path=str(clip_path), media_type="audio/mpeg", filename=clip_name)
+
+
+@router.get("/search", response_model=AudioSearchResp)
+def search_audio(
+    request: Request,
+    q: str = Query(..., min_length=1),
+    k: int = Query(6, ge=1, le=20),
+    current_user: UserInDB = Depends(get_current_user),
+) -> AudioSearchResp:
+    return query_audio(request=request, q=q, k=k, current_user=current_user)
+
+
+
+@router.post("/docs/{audio_id}/reindex")
+def reindex_audio_doc_api(audio_id: str, current_user: UserInDB = Depends(get_current_user)):
+    require_kb_manage_docs(current_user)
+
+    if audio_db.is_audio_running(audio_id):
+        raise HTTPException(status_code=409, detail="audio is running, try later")
+
+    doc = audio_db.get_audio_document(audio_id)
+    if not doc:
+        raise HTTPException(status_code=404, detail="audio not found")
+
+    job_id = f"job-{uuid.uuid4().hex[:12]}"
+    audio_job_db.create_job(job_id, audio_id, overwrite=False, delete_old_file=False, old_stored_path=None)
+
+    async_result = audio_reindex_task.apply_async(
+        args=[job_id, audio_id],
+        queue=getattr(settings, "celery_audio_queue", "audio"),
+    )
+    audio_job_db.bind_task(job_id, async_result.id)
+
+    return {
+        "job_id": job_id,
+        "audio_id": audio_id,
+        "celery_task_id": async_result.id,
+        "status_url": f"/audio/jobs/{job_id}",
+    }

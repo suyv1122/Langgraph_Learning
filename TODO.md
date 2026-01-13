@@ -6,6 +6,7 @@
 NEXT
 - ### 人类语言翻译每个文件内每个函数的意义
 - ### pipeline.py 的人类化语言描述
+- ### 将mysql.py改为数据库连接池，并保留get_cellection
 
 ## DONE
 - ### 将基础模型Base_model 单独提出并保存 (app/model/auth_model)
