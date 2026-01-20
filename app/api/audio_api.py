@@ -16,6 +16,8 @@ from app.model.audio_model import AudioIngestAsyncResp, AudioJobResp, AudioDocDe
     AudioCitation, AudioAskResp, AudioAskReq
 from app.service.rbac_service import allowed_kb_visibilities, check_permission
 from app.tasks.audio_tasks import audio_ingest_task
+from app.rag.audio_hybrid import hybrid_search
+from app.rag.es_audio_admin import reset_audio_index
 
 router = APIRouter(prefix="/audio", tags=["audio"])
 
@@ -633,3 +635,14 @@ def get_audio_clip(
     background_tasks.add_task(lambda p=str(clip_path): Path(p).unlink(missing_ok=True))
 
     return FileResponse(path=str(clip_path), media_type="audio/mpeg", filename=clip_name)
+
+
+@router.post("/admin/reset_es_audio_index")
+def admin_reset_es_audio_index(current_user: UserInDB = Depends(get_current_user)):
+    # 这里沿用你已有的 kb.manage_docs 管理权限逻辑
+    perms = set(getattr(current_user, "permissions", []) or [])
+    if not getattr(current_user, "is_super_admin", False) and "kb.manage_docs" not in perms:
+        raise HTTPException(status_code=403, detail="Missing permission: kb.manage_docs")
+
+    reset_audio_index()
+    return {"ok": True, "index": settings.es_audio_index}

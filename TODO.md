@@ -6,6 +6,7 @@
 NEXT
 - ### 人类语言翻译每个文件内每个函数的意义
 - ### pipeline.py 的人类化语言描述
+- ### 内容结束后，就 es & BM25 + embedding + rerank 自行实现一个查询langgraph
 
 ## DONE
 - ### 将基础模型Base_model 单独提出并保存 (app/model/auth_model)
