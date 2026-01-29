@@ -8,7 +8,7 @@ celery_app = Celery(
     "enterprise_assistant",
     broker=settings.rabbitmq_url,
     backend=settings.celery_result_backend,
-    include=["app.tasks.example"],
+    include=[],
 )
 
 celery_app.conf.update(

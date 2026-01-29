@@ -20,14 +20,3 @@ def ok(data: Any, meta: dict[str, Any] | Meta | None = None) -> dict:
 
     # 如果都不是，把meta当成映射对象转dict
     return {"data": data, "meta": dict(meta)}
-
-
-def no_store(response: Response) -> None:
-    # no_store()设置Cache-Control: no-store，直接往相应头里写就行了
-    response.headers[HDR_CACHE_CONTROL] = "no-store"
-
-
-# 组合之前的no_store和ok。这个主要适用于token、me等敏感接口
-def ok_no_store(response: Response, data: Any, meta: dict[str, Any] | Meta | None = None) -> dict:
-    no_store(response)
-    return ok(data, meta=meta)

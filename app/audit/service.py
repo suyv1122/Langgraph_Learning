@@ -51,29 +51,29 @@ def _std_meta(	# 标准化meta，同时注入error_code，并脱敏
     return redact_obj(m2)
 
 
-def record(	# 记录一条审计事件到当前请求的缓冲区————不直接写DB
-    *,
-    action: str,	# 动作名
-    status: str = "ok",
-    http_status: int | None = None,
-    scope_key: str | None = None,
-    resource_type: str | None = None,
-    resource_ref_id: int | None = None,
-    actor_user_id: int | None = None,
-    meta: Any | None = None,
-    error_code: str | None = None,
-) -> None:
-    evt = {	# 构造审计事件dict
-        "request_id": get_request_id(),
-        "actor_user_id": actor_user_id if actor_user_id is not None else get_user_id(),
-        "action": str(action),
-        "scope_key": str(scope_key) if scope_key is not None else None,
-        "resource_type": str(resource_type) if resource_type is not None else None,
-        "resource_ref_id": int(resource_ref_id) if resource_ref_id is not None else None,
-        "status": str(status),
-        "http_status": int(http_status) if http_status is not None else None,
-        "ip": str(get_client_ip()) if get_client_ip() else None,
-        "user_agent": str(get_user_agent()) if get_user_agent() else None,
-        "meta": _std_meta(meta=meta, error_code=error_code),
-    }
-    add_audit_event(evt)
+# def record(	# 记录一条审计事件到当前请求的缓冲区————不直接写DB
+#     *,
+#     action: str,	# 动作名
+#     status: str = "ok",
+#     http_status: int | None = None,
+#     scope_key: str | None = None,
+#     resource_type: str | None = None,
+#     resource_ref_id: int | None = None,
+#     actor_user_id: int | None = None,
+#     meta: Any | None = None,
+#     error_code: str | None = None,
+# ) -> None:
+#     evt = {	# 构造审计事件dict
+#         "request_id": get_request_id(),
+#         "actor_user_id": actor_user_id if actor_user_id is not None else get_user_id(),
+#         "action": str(action),
+#         "scope_key": str(scope_key) if scope_key is not None else None,
+#         "resource_type": str(resource_type) if resource_type is not None else None,
+#         "resource_ref_id": int(resource_ref_id) if resource_ref_id is not None else None,
+#         "status": str(status),
+#         "http_status": int(http_status) if http_status is not None else None,
+#         "ip": str(get_client_ip()) if get_client_ip() else None,
+#         "user_agent": str(get_user_agent()) if get_user_agent() else None,
+#         "meta": _std_meta(meta=meta, error_code=error_code),
+#     }
+#     add_audit_event(evt)
