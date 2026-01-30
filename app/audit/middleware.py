@@ -56,7 +56,7 @@ async def flush_audit(request: Request, response) -> None:
 
         session_maker = request.app.state.db_session_maker  # 从应用状态取出数据库session工厂
         async with session_maker() as db:
-            async with db.begin():
+            async with db.begin_nested():
                 for e in events:
                     if e.get("http_status") is None:
                         e["http_status"] = status_code  # 设置字段为响应状态码

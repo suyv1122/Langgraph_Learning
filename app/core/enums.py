@@ -1,3 +1,4 @@
+# 1.2
 from enum import Enum
 
 class Env(str, Enum):  		# 定义这个东西主要是开发、生产与发布

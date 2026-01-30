@@ -1,4 +1,7 @@
+# 1.11
 from __future__ import annotations
+
+from pathlib import Path
 
 from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -13,7 +16,7 @@ from app.core.security_defaults import (
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file="/Users/peter/PycharmProjects/enterprise-assistant/.env",
+    model_config = SettingsConfigDict(env_file=Path(__file__).resolve().parents[2] / ".env",
                                       env_file_encoding="utf-8")
 
     env: Env = Field(default=Env.dev, alias="ENV")

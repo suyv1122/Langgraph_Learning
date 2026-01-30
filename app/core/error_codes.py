@@ -1,3 +1,4 @@
+# 1.5
 from __future__ import annotations
 
 # ERROR_MESSAGES：错误码影射去默认的message

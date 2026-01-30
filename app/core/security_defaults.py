@@ -1,3 +1,4 @@
+# 1.10
 DEFAULT_HSTS_MAX_AGE = 31536000
 # HSTS的默认max-age此处是秒，一共是365天
 # 浏览器在接下来1年内访问这个域名时都会强制使用HTTPS

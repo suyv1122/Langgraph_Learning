@@ -1,0 +1,13 @@
+from __future__ import annotations
+
+ASSET_STATUS_PENDING = "pending"
+ASSET_STATUS_UPLOADED = "uploaded"
+ASSET_STATUS_PROCESSING = "processing"
+ASSET_STATUS_READY = "ready"
+ASSET_STATUS_FAILED = "failed"
+ASSET_STATUS_DELETED = "deleted"
+
+INDEX_JOB_STATUS_QUEUED = "queued"
+INDEX_JOB_STATUS_RUNNING = "running"
+INDEX_JOB_STATUS_DONE = "done"
+INDEX_JOB_STATUS_FAILED = "failed"
