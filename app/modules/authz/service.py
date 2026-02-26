@@ -10,6 +10,7 @@ from app.modules.auth.models import Permission, RolePermission, User, UserRoleGr
 from app.modules.authz.scope_keys import scopes_with_global
 
 
+# 改名了，参考deps.py备注
 async def require_perms(  # 权限检查核心函数，没有权限就抛错，并记录审计
     db: AsyncSession,
     *,

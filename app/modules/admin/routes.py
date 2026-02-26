@@ -121,7 +121,7 @@ async def grant_role(req: GrantRoleReq, me: User = Depends(AdminUser), db: Async
             )
         )
 
-        async with db.begin_nested():
+        async with db.begin():
             res = await db.execute(stmt)
 
         rc = int(getattr(res, "rowcount", 0) or 0)
@@ -186,7 +186,7 @@ async def revoke_role(
         UserRoleGrant.scope_key == scope_key,
     )
 
-    async with db.begin_nested():
+    async with db.begin():
         res = await db.execute(stmt)
 
     deleted = int(res.rowcount or 0)

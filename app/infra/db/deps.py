@@ -16,6 +16,18 @@ async def get_db(request: Request) -> AsyncGenerator[AsyncSession, None]:
         wid = getattr(request.state, "workspace_id", None)
         if wid is None:
             wid = get_workspace_id()
+
         wid_val = str(int(wid)) if wid is not None else "0"
-        await session.execute(text("SELECT set_config('app.tenant_id', :v, true)"), {"v": wid_val})
-        yield session
+
+        await session.execute(
+            text("SELECT set_config('app.tenant_id', :v, false)"),
+            {"v": wid_val},
+        )
+
+        await session.commit()
+
+        try:
+            yield session
+        finally:
+            if session.in_transaction():
+                await session.rollback()

@@ -1,3 +1,4 @@
+# TODO: 在application.state这类句子下方增加命令，正确性待校验
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
@@ -22,6 +23,9 @@ from app.modules.admin.routes import router as admin_router
 from app.modules.authn.routes import router as auth_router
 from app.modules.authz.seed_sync import sync_authz
 
+from app.infra.qdrant_client import create_qdrant_client
+from app.infra.blob_storage.local_fs import LocalFSStorage
+
 
 @asynccontextmanager
 async def lifespan(application: FastAPI):
@@ -30,6 +34,8 @@ async def lifespan(application: FastAPI):
     engine = create_engine()
     application.state.db_engine = engine
     application.state.db_session_maker = create_session_maker(engine)
+    application.state.qdrant = create_qdrant_client()
+    application.state.storage = LocalFSStorage(root_dir=str(settings.blob_local_root))
 
     redis = Redis.from_url(
         settings.redis_url,
@@ -41,24 +47,34 @@ async def lifespan(application: FastAPI):
         health_check_interval=settings.redis_health_check_interval,
     )
     application.state.redis = redis
+    application.state.qdrant = create_qdrant_client()
+    application.state.storage = LocalFSStorage(root_dir=str(settings.blob_local_root))
 
     application.state.es = create_es_client()
+    application.state.qdrant = create_qdrant_client()
+    application.state.storage = LocalFSStorage(root_dir=str(settings.blob_local_root))
 
     await run_startup_checks(application)
 
     if settings.auto_sync_authz:
         async with application.state.db_session_maker() as db:
+            application.state.qdrant = create_qdrant_client()
+            application.state.storage = LocalFSStorage(root_dir=str(settings.blob_local_root))
             await sync_authz(db)
 
     yield
 
     try:
         await application.state.es.close()
+        application.state.qdrant = create_qdrant_client()
+        application.state.storage = LocalFSStorage(root_dir=str(settings.blob_local_root))
     except Exception:
         pass
 
     try:
         aclose = getattr(application.state.redis, "aclose", None)
+        application.state.qdrant = create_qdrant_client()
+        application.state.storage = LocalFSStorage(root_dir=str(settings.blob_local_root))
         if callable(aclose):
             await aclose()
         else:
@@ -68,6 +84,8 @@ async def lifespan(application: FastAPI):
 
     try:
         await application.state.db_engine.dispose()
+        application.state.qdrant = create_qdrant_client()
+        application.state.storage = LocalFSStorage(root_dir=str(settings.blob_local_root))
     except Exception:
         pass
 

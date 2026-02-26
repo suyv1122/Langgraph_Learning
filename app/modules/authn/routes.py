@@ -60,7 +60,7 @@ _rl_refresh = _auth_rl(RL_AUTH_REFRESH)  # # 刷新接口限流依赖
     dependencies=[Depends(_rl_register)],
 )
 async def register(req: RegisterReq, response: Response, db: AsyncSession = Depends(get_db)):
-    async with db.begin_nested():  # 事务打开
+    async with db.begin():  # 事务打开
         exists = (await db.execute(select(User).where(User.email == req.email))).scalar_one_or_none()  # 根据结果数量返回不同内容
         if exists:
             record(

@@ -11,7 +11,7 @@ from app.modules.authz.seed import DEFAULT_ROLE_PERMS, PERMISSIONS, ROLES
 
 async def sync_authz(db: AsyncSession) -> None:
 # 把seed.py中的roles/permissions同步进数据库，并补齐默认role-perm映射
-    async with db.begin_nested():
+    async with db.begin():
         for name, desc in ROLES:
             stmt = (
                 pg_insert(Role)

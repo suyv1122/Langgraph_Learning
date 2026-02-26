@@ -103,6 +103,26 @@ class Settings(BaseSettings):
 
     auth_rate_limit_window_seconds: int = Field(default=60, alias="AUTH_RATE_LIMIT_WINDOW_SECONDS")
 
+    qdrant_url: str = Field(default="http://127.0.0.1:6333", alias="QDRANT_URL")
+
+    qdrant_api_key: str | None = Field(default=None, alias="QDRANT_API_KEY")
+
+    qdrant_timeout_seconds: float = Field(default=10.0, alias="QDRANT_TIMEOUT_SECONDS")
+
+    blob_backend: str = Field(default="local", alias="BLOB_BACKEND")
+
+    blob_local_root: str = Field(default=".data/blobs", alias="BLOB_LOCAL_ROOT")
+
+    blob_s3_endpoint_url: str | None = Field(default=None, alias="BLOB_S3_ENDPOINT_URL")
+
+    blob_s3_bucket: str | None = Field(default=None, alias="BLOB_S3_BUCKET")
+
+    blob_s3_access_key_id: str | None = Field(default=None, alias="BLOB_S3_ACCESS_KEY_ID")
+
+    blob_s3_secret_access_key: str | None = Field(default=None, alias="BLOB_S3_SECRET_ACCESS_KEY")
+
+    blob_s3_region: str | None = Field(default=None, alias="BLOB_S3_REGION")
+
     @model_validator(mode="after")
     def _validate_cors(self) -> "Settings":
         if (self.cors_allow_origins or "").strip() == "*" and bool(self.cors_allow_credentials):

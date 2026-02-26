@@ -9,7 +9,7 @@ celery_app = Celery(
     "enterprise_assistant",
     broker=settings.rabbitmq_url,
     backend=settings.celery_result_backend,
-    include=[],
+    include=["app.workers.tasks.kb_ingest"],
 )
 
 celery_app.conf.update(

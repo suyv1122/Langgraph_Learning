@@ -11,6 +11,7 @@ from app.modules.auth.models import User
 from app.modules.authn.deps import get_current_user
 from app.modules.authz.service import require_perms
 
+# any_permission_required 后续变更为此名
 def permission_required(*perm_codes: str, scope_builder: Callable[[Request], str]):
     async def _dep(
         request: Request,

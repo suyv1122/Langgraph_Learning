@@ -1,0 +1,58 @@
+services:
+  qdrant:
+    image: qdrant/qdrant:v1.16
+    container_name: kb_qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    restart: unless-stopped
+    networks:
+      - backend
+
+  es01:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.2.3
+    container_name: kb_es01
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - bootstrap.memory_lock=true
+    ports:
+      - "9200:9200"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    restart: unless-stopped
+    networks:
+      - backend
+
+  pg18:
+    image: postgres:18.1-bookworm
+    container_name: kb_pg18
+    environment:
+      - POSTGRES_PASSWORD=123456
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - backend
+
+  redis:
+    image: redis:7
+    container_name: kb_redis
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes"]
+    restart: unless-stopped
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
+
+# docker-compose up -d 建立网络中容器
+# docker-compose stop 停止容器运行但不删除
+# docker-compose start 继续容器运行
+# docker-compose down 删除内容中容器
