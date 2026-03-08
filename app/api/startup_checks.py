@@ -1,4 +1,3 @@
-# 这段代码在项目启动之前作为一次性的检测脚本，只运行一次，通过了项目就可以启动了
 from __future__ import annotations
 
 import logging
@@ -11,7 +10,7 @@ from app.core.enums import Env
 logger = logging.getLogger(__name__)
 
 
-def _is_prod() -> bool:  # 是不是生产环境/上线了
+def _is_prod() -> bool:
     return settings.env in {Env.prod, Env.production}
 
 
@@ -42,3 +41,7 @@ async def run_startup_checks(app) -> None:
     if not ok:
         raise RuntimeError("elasticsearch_ping_failed")
 
+    try:
+        app.state.qdrant.get_collections()
+    except Exception as e:
+        raise RuntimeError("qdrant_ping_failed") from e

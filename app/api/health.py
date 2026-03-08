@@ -1,4 +1,3 @@
-# 这个代码是项目启动后，每隔一段时间或者利用外部工具来检测项目本身、中间件是否正常而使用的
 from __future__ import annotations
 
 from fastapi import APIRouter, Request
@@ -23,6 +22,7 @@ async def readyz(request: Request):
     db_ok = False
     redis_ok = False
     es_ok = False
+    qdrant_ok = False
 
     try:
         session_maker = request.app.state.db_session_maker
@@ -45,8 +45,15 @@ async def readyz(request: Request):
     except Exception:
         es_ok = False
 
-    ok_all = bool(db_ok and redis_ok and es_ok)
-    return ok({"ok": ok_all, "deps": {"db": db_ok, "redis": redis_ok, "es": es_ok}})
+    try:
+        q = request.app.state.qdrant
+        q.get_collections()
+        qdrant_ok = True
+    except Exception:
+        qdrant_ok = False
+
+    ok_all = bool(db_ok and redis_ok and es_ok and qdrant_ok)
+    return ok({"ok": ok_all, "deps": {"db": db_ok, "redis": redis_ok, "es": es_ok, "qdrant": qdrant_ok}})
 
 
 @router.get("/version", response_model=ApiResponse[dict])

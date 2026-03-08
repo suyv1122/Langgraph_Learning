@@ -1,19 +1,21 @@
+# 存储的资源(无论云端/本地)都应有独属于自己的keys，不能撞名
+# 即将文件名校验，替换掉不支持的字符后，确保名称独立性
 from __future__ import annotations
 
-from app.modules.kb.ingestion.utils import sha256_bytes
+import re
 
-# import hashlib
-# def _h(s: str) -> str:
-#     return hashlib.sha256(s.encode("utf-8")).hexdigest()
+_RE_SAFE = re.compile(r"[^A-Za-z0-9._-]+")  # 文件名只允许正则表达式限制的内容
+
+def _safe_name(s: str) -> str:  # 将文件名清洗成安全可用的名称并限制长度，不符合正则表达式的元素会替换成下划线
+    s = (s or "").strip()
+    if not s:
+        return "file"
+    s = _RE_SAFE.sub("_", s)
+    return s[:200] if len(s) > 200 else s
 
 
 def asset_original_key(*, workspace_id: int, asset_id: int, filename: str) -> str:
-    fn = str(filename or "").strip() or "file"
-    salt = sha256_bytes(f"{int(workspace_id)}:{int(asset_id)}:{fn}".encode("utf-8"))[:16]
-    return f"kb/ws/{int(workspace_id)}/assets/{int(asset_id)}/original/{salt}/{fn}"
-
-
-def asset_derivative_key(*, workspace_id: int, asset_id: int, name: str) -> str:
-    nm = str(name or "").strip() or "derivative"
-    salt = sha256_bytes(f"{int(workspace_id)}:{int(asset_id)}:{nm}".encode("utf-8"))[:16]
-    return f"kb/ws/{int(workspace_id)}/assets/{int(asset_id)}/derived/{salt}/{nm}"
+    # 为资产原始文件生成统一的储存路径key
+    fn = _safe_name(filename)
+    # 注意返回值，不要project id 是合理且正确的
+    return f"ws/{int(workspace_id)}/assets/{int(asset_id)}/original/{fn}"

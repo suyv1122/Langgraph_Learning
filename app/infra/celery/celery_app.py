@@ -1,4 +1,3 @@
-# 2.7
 from __future__ import annotations
 
 from celery import Celery
@@ -9,7 +8,9 @@ celery_app = Celery(
     "enterprise_assistant",
     broker=settings.rabbitmq_url,
     backend=settings.celery_result_backend,
-    include=["app.workers.tasks.kb_ingest"],
+    include=[
+        "app.modules.kb.tasks",
+    ],
 )
 
 celery_app.conf.update(

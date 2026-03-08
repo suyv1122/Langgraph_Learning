@@ -1,13 +1,19 @@
-from __future__ import annotations
-
 ASSET_STATUS_PENDING = "pending"
 ASSET_STATUS_UPLOADED = "uploaded"
-ASSET_STATUS_PROCESSING = "processing"
+ASSET_STATUS_INDEXING = "indexing"
 ASSET_STATUS_READY = "ready"
 ASSET_STATUS_FAILED = "failed"
 ASSET_STATUS_DELETED = "deleted"
 
-INDEX_JOB_STATUS_QUEUED = "queued"
-INDEX_JOB_STATUS_RUNNING = "running"
-INDEX_JOB_STATUS_DONE = "done"
-INDEX_JOB_STATUS_FAILED = "failed"
+RESOURCE_TYPE_DOC = "doc"
+RESOURCE_TYPE_AUDIO = "audio"
+RESOURCE_TYPE_IMAGE = "image"
+RESOURCE_TYPE_VIDEO = "video"
+
+ALLOWED_RESOURCE_TYPES = {RESOURCE_TYPE_DOC, RESOURCE_TYPE_AUDIO, RESOURCE_TYPE_IMAGE, RESOURCE_TYPE_VIDEO}
+
+JOB_KIND_INGEST = "ingest"  # 任务种类(kind) 任务可能有多个种类，这是切分
+JOB_STATUS_QUEUED = "queued"    # 任务状态(status) 排队/正在执行/完成/失败 等
+JOB_STATUS_RUNNING = "running"
+JOB_STATUS_DONE = "done"
+JOB_STATUS_FAILED = "failed"
