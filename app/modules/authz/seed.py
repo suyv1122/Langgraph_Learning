@@ -1,4 +1,3 @@
-# 7.3
 from __future__ import annotations
 
 from typing import Final
@@ -10,7 +9,7 @@ ROLES: Final[tuple[tuple[str, str], ...]] = (
     ("viewer", "Read-only access"),
 )
 
-PERMISSIONS: Final[tuple[tuple[str, str], ...]] = (
+BASE_PERMISSIONS: Final[tuple[tuple[str, str], ...]] = (
     ("workspace.manage", "Manage workspace settings/members"),
     ("project.manage", "Manage projects"),
     ("doc.read", "Read documents"),
@@ -29,6 +28,13 @@ PERMISSIONS: Final[tuple[tuple[str, str], ...]] = (
     ("ticket.close", "Close tickets"),
 )
 
+AGENT_PERMISSIONS: Final[tuple[tuple[str, str], ...]] = (
+    ("agent.use", "Use agent chat/run endpoints"),
+    ("agent.approval.review", "Review and decide agent approvals"),
+)
+
+PERMISSIONS: Final[tuple[tuple[str, str], ...]] = BASE_PERMISSIONS + AGENT_PERMISSIONS
+
 _ALL_PERM_CODES: Final[tuple[str, ...]] = tuple(code for code, _ in PERMISSIONS)
 
 DEFAULT_ROLE_PERMS: Final[dict[str, tuple[str, ...]]] = {
@@ -44,6 +50,7 @@ DEFAULT_ROLE_PERMS: Final[dict[str, tuple[str, ...]]] = {
         "image.write",
         "ticket.read",
         "ticket.create",
+        "agent.use",
     ),
     "viewer": (
         "doc.read",

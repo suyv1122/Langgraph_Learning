@@ -1,7 +1,6 @@
-# 1.5
 from __future__ import annotations
 
-ERROR_MESSAGES: dict[str, str] = {
+BASE_ERROR_MESSAGES: dict[str, str] = {
     "error.validation_failed": "validation_failed",
     "error.internal": "internal_error",
     "error.http": "http_error",
@@ -32,7 +31,27 @@ ERROR_MESSAGES: dict[str, str] = {
     "kb.search_failed": "search failed",
 }
 
-ERROR_STATUS: dict[str, int] = {
+AGENT_ERROR_MESSAGES: dict[str, str] = {
+    "agents.run_canceled": "Agent run was canceled.",
+    "agents.run_not_found": "Agent run not found.",
+    "agents.step_limit_exceeded": "Agent step limit exceeded.",
+    "agents.tool_limit_exceeded": "Agent tool limit exceeded.",
+    "agents.tool_requires_approval": "Tool execution requires approval.",
+    "agents.tool_unknown": "Unknown tool.",
+    "agents.approval_not_found": "Approval not found.",
+    "agents.approval_targets_missing": "Approval target run or step is missing.",
+    "agents.invalid_scope": "Invalid scope for agent tool execution.",
+    "agents.input_too_large": "Agent input is too large.",
+    "agents.kb_asset_not_found": "KB asset not found.",
+    "agents.kb_search_not_available": "KB search service is not available.",
+}
+
+ERROR_MESSAGES: dict[str, str] = {
+    **BASE_ERROR_MESSAGES,
+    **AGENT_ERROR_MESSAGES,
+}
+
+BASE_ERROR_STATUS: dict[str, int] = {
     "error.validation_failed": 422,
     "error.internal": 500,
     "error.http": 400,
@@ -61,4 +80,24 @@ ERROR_STATUS: dict[str, int] = {
     "kb.ingest_unsupported": 400,
     "kb.ingest_failed": 500,
     "kb.search_failed": 500,
+}
+
+AGENT_ERROR_STATUS: dict[str, int] = {
+    "agents.run_canceled": 409,
+    "agents.run_not_found": 404,
+    "agents.step_limit_exceeded": 400,
+    "agents.tool_limit_exceeded": 400,
+    "agents.tool_requires_approval": 409,
+    "agents.tool_unknown": 404,
+    "agents.approval_not_found": 404,
+    "agents.approval_targets_missing": 409,
+    "agents.invalid_scope": 400,
+    "agents.input_too_large": 413,
+    "agents.kb_asset_not_found": 404,
+    "agents.kb_search_not_available": 503,
+}
+
+ERROR_STATUS: dict[str, int] = {
+    **BASE_ERROR_STATUS,
+    **AGENT_ERROR_STATUS,
 }
